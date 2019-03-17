@@ -51,7 +51,7 @@ def view_bin(bin_id):
         abort(404)
 
     pipe = redis.pipeline(transaction=True)
-    exists = pipe.exists(f"bin-{bin_id}").execute()[0]
+    exists = pipe.exists(f"bin-existence-{bin_id}").execute()[0]
     if not exists:
         abort(404)
 
@@ -61,13 +61,13 @@ def view_bin(bin_id):
         'headers': list(request.headers),
         'form': list(request.form.items()),
         'args': list(request.args.items()),
-        'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     }
 
     result = json.dumps(obj)
 
     pipe = redis.pipeline(transaction=True)
-    pipe.lpush(f"bin-{bin_id}", result)
+    pipe.lpush(f'bin-{bin_id}', result)
     pipe.execute()
     return 'OK'
 
@@ -78,9 +78,12 @@ def bin_stats(bin_id):
         abort(404)
 
     pipe = redis.pipeline(transaction=True)
-    pipe.lrange(name=f"bin-{bin_id}", start=0, end=10)
-    pipe.expire(name=f"bin-{bin_id}", time=300)
-    requests = pipe.execute()[0]
+    pipe.lrange(name=f'bin-{bin_id}', start=0, end=10)
+    pipe.set(name=f'bin-existence-{bin_id}', value=1)
+    pipe.expire(name=f'bin-existence-{bin_id}', time=300)
+
+    result = pipe.execute()
+    requests = result[0]
 
     try:
         requests = [json.loads(x.decode()) for x in requests]
