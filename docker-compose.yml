@@ -1,0 +1,12 @@
+version: '2.2'
+
+services:
+  service:
+    build: .
+    ports:
+      - "5000:5000"
+    restart: on-failure
+    tty: true
+
+  shared_redis:
+    image: redis

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row mt-3 justify-content-center">
+        <div class="col text-center">
+            <p class="lead">Your bin id is <strong>{{ bin_id }}</strong>. Bin is stored 5 minutes after loading this page</p>
+            <p class="lead">You can access stats at:
+                <code>{{ url_for('bin_stats', bin_id=bin_id, _external=True) }}</code></p>
+            <p class="lead">The bin itself is located at:
+                <code>{{ url_for('bin', bin_id=bin_id, _external=True) }}</code></p>
+        </div>
+        {% for request in requests %}
+            <div class="row justify-content-center mt-3">
+                <div class="col-9">
+                    <div class="card">
+                        <div class="card-header">
+                            <p class="h5">{{ request['method'] }} to {{ request['url'] }} at {{ request['time'] }}</p>
+                        </div>
+                        <div class="card-body">
+                            <p class="h6">Headers:</p>
+                            <ul>
+                                {% for header in request['headers'] %}
+                                    <li><strong>{{ header[0] }}</strong>: {{ header[1] }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p class="h6">Form:</p>
+                            <ul>
+                                {% for each in request['form'] %}
+                                    <li><strong>{{ ech[0] }}</strong>: {{ each[1] }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p class="h6">Args:</p>
+                            <ul>
+                                {% for arg in request['args'] %}
+                                    <li><strong>{{ arg[0] }}</strong>: {{ arg[1] }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
