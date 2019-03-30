@@ -1,10 +1,11 @@
-from flask import Flask, request, redirect, url_for, render_template, abort
+from flask import Flask, request, redirect, url_for, render_template, abort, make_response
 import secrets
 from redis import StrictRedis
 from werkzeug.routing import Rule
 import re
 import json
 from datetime import datetime
+from functools import wraps
 
 
 class ReverseProxied(object):
@@ -34,6 +35,16 @@ app.url_map.add(Rule('/bin/<bin_id>', endpoint='bin'))
 redis = StrictRedis(host='shared_redis', port=6379, db=0)
 
 
+def cors_unprotect(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        response = make_response(func(*args, **kwargs))
+        response.headers['Access-Control-Allow-Origin'] = "*"
+        return response
+
+    return wrapper
+
+
 @app.route('/')
 def hello_world():
     return render_template('index.html')
@@ -46,6 +57,7 @@ def new_bin():
 
 
 @app.endpoint('bin')
+@cors_unprotect
 def view_bin(bin_id):
     if not re.match('^[0-9a-f]{10}$', bin_id):
         abort(404)
