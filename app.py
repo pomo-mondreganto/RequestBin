@@ -35,16 +35,6 @@ app.url_map.add(Rule('/bin/<bin_id>', endpoint='bin'))
 redis = StrictRedis(host='shared_redis', port=6379, db=0)
 
 
-def cors_unprotect(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        response = make_response(func(*args, **kwargs))
-        response.headers['Access-Control-Allow-Origin'] = "*"
-        return response
-
-    return wrapper
-
-
 @app.route('/')
 def hello_world():
     return render_template('index.html')
@@ -57,7 +47,6 @@ def new_bin():
 
 
 @app.endpoint('bin')
-@cors_unprotect
 def view_bin(bin_id):
     if not re.match('^[0-9a-f]{10}$', bin_id):
         abort(404)
@@ -67,12 +56,19 @@ def view_bin(bin_id):
     if not exists:
         abort(404)
 
+    maybe_json = request.get_json(silent=True, cache=False)
+    if maybe_json:
+        thejson = json.dumps(maybe_json)
+    else:
+        thejson = "no json"
+
     obj = {
         'method': request.method,
         'url': request.url,
         'headers': list(request.headers),
         'form': list(request.form.items()),
         'args': list(request.args.items()),
+        'json': thejson,
         'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     }
 

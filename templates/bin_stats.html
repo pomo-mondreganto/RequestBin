@@ -1,7 +1,20 @@
 {% extends "base.html" %}
 
+{% block styles %}
+    <style type="text/css">
+        .request-container {
+            display: grid;
+            grid: '. request-obj .' 1fr / 3fr 18fr 3fr;
+        }
+
+    .request-obj {
+        grid-area: request-obj;
+    }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <div class="row mt-3 justify-content-center">
+    <div class="row my-3 justify-content-center">
         <div class="col-10 text-center">
             <p class="lead">Your bin id is <strong>{{ bin_id }}</strong>. Bin is stored 5 minutes after loading this
                 page</p>
@@ -17,8 +30,8 @@
             </p>
         </div>
         {% for request in requests %}
-            <div class="row justify-content-center mt-3">
-                <div class="col-9">
+            <div class="row justify-content-center mt-3 request-container" style="word-break: break-all;">
+                <div class="request-obj">
                     <div class="card">
                         <div class="card-header">
                             <p class="h5">{{ request['method'] }} to {{ request['url'] }} at {{ request['time'] }}</p>
@@ -42,6 +55,8 @@
                                     <li><strong>{{ arg[0] }}</strong>: {{ arg[1] }}</li>
                                 {% endfor %}
                             </ul>
+                            <p class="h6">JSON:</p>
+                            <p class="pl-3">{{ request['json'] }}</p>
                         </div>
                     </div>
                 </div>
